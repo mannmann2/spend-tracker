@@ -227,7 +227,9 @@ def render_badges(items: list[str]) -> None:
     st.markdown(f'<div class="app-badge-row">{badges}</div>', unsafe_allow_html=True)
 
 
-def render_metrics_row(metrics: list[tuple[str, str | int | float]], columns: int | None = None) -> None:
+def render_metrics_row(
+    metrics: list[tuple[str, str | int | float]], columns: int | None = None
+) -> None:
     if not metrics:
         return
     column_count = columns or len(metrics)
@@ -253,15 +255,21 @@ def render_filters_sidebar(df):
     min_date = df["txn_date"].dt.date.min() if not df.empty else date.today()
     max_date = df["txn_date"].dt.date.max() if not df.empty else date.today()
 
-    start_date = st.sidebar.date_input("Start date", value=min_date, min_value=min_date, max_value=max_date)
-    end_date = st.sidebar.date_input("End date", value=max_date, min_value=min_date, max_value=max_date)
+    start_date = st.sidebar.date_input(
+        "Start date", value=min_date, min_value=min_date, max_value=max_date
+    )
+    end_date = st.sidebar.date_input(
+        "End date", value=max_date, min_value=min_date, max_value=max_date
+    )
     include_transfers = st.sidebar.toggle("Show transfers", value=False)
     categories = st.sidebar.multiselect(
         "Categories",
         options=sorted(df["category"].unique()) if not df.empty else [],
     )
     accounts = st.sidebar.multiselect("Accounts", options=get_accounts())
-    directions = st.sidebar.multiselect("Direction", options=["debit", "credit"], default=["debit", "credit"])
+    directions = st.sidebar.multiselect(
+        "Direction", options=["debit", "credit"], default=["debit", "credit"]
+    )
 
     filtered = filter_transactions(
         df,

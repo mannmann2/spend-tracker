@@ -11,7 +11,7 @@ __pycache__/
 
 .env
 .env.*
-.streamlit/
+.streamlit/secrets.toml
 
 .pytest_cache/
 .mypy_cache/
