@@ -1,5 +1,5 @@
-import json
 import hashlib
+import json
 import logging
 from dataclasses import dataclass, field
 from datetime import date
@@ -104,7 +104,9 @@ def extract_text_from_pdf(file_bytes: bytes, page_numbers: list[int] | None = No
         )
         for page_index in selected_pages:
             if page_index < 0 or page_index >= len(pdf.pages):
-                logger.warning("Skipping out-of-range page during extraction", extra={"page_index": page_index})
+                logger.warning(
+                    "Skipping out-of-range page during extraction", extra={"page_index": page_index}
+                )
                 continue
             page_text = pdf.pages[page_index].extract_text() or ""
             logger.debug(
@@ -121,7 +123,9 @@ def extract_text_from_pdf(file_bytes: bytes, page_numbers: list[int] | None = No
 
 
 def merchant_key(description: str) -> str:
-    cleaned = "".join(char if char.isalnum() or char == " " else " " for char in description.lower())
+    cleaned = "".join(
+        char if char.isalnum() or char == " " else " " for char in description.lower()
+    )
     for token in ("card", "debit", "purchase", "pos", "payment", "ref", "visa", "mastercard"):
         cleaned = cleaned.replace(token, " ")
     cleaned = " ".join(cleaned.split())
@@ -149,7 +153,9 @@ def _clean_amount(raw_amount: str) -> tuple[float | None, str]:
     token = raw_amount.strip().lower()
     direction = "credit" if token.startswith("+") or token.endswith("cr") else "debit"
     negative = token.startswith("-") or token.startswith("(")
-    token = token.replace("cr", "").replace("dr", "").replace("$", "").replace("£", "").replace("€", "")
+    token = (
+        token.replace("cr", "").replace("dr", "").replace("$", "").replace("£", "").replace("€", "")
+    )
     token = token.replace("+", "")
     token = token.replace(",", "").replace("(", "").replace(")", "").strip()
     try:
@@ -198,7 +204,9 @@ def _chunk_text_for_llm(text: str, max_chars: int = 14000) -> list[str]:
         current_len += len(line) + 1
     if current:
         chunks.append("\n".join(current))
-    logger.info("Chunked statement text for LLM", extra={"chunk_count": len(chunks), "max_chars": max_chars})
+    logger.info(
+        "Chunked statement text for LLM", extra={"chunk_count": len(chunks), "max_chars": max_chars}
+    )
     return chunks
 
 
@@ -281,7 +289,11 @@ def _parse_transactions_from_items(items: list[dict]) -> list[ParsedTransaction]
         )
     logger.info(
         "Converted LLM payload items into transactions",
-        extra={"item_count": len(items), "transaction_count": len(transactions), "skipped_items": skipped_items},
+        extra={
+            "item_count": len(items),
+            "transaction_count": len(transactions),
+            "skipped_items": skipped_items,
+        },
     )
     return transactions
 
@@ -298,7 +310,9 @@ def llm_parse_transactions(text: str) -> list[ParsedTransaction]:
         logger.debug("Structured output configured for transaction extraction")
     except Exception:
         structured_llm = None
-        logger.warning("Structured output unavailable; transaction parsing will use fallback prompts")
+        logger.warning(
+            "Structured output unavailable; transaction parsing will use fallback prompts"
+        )
 
     transactions: list[ParsedTransaction] = []
     chunks = _chunk_text_for_llm(text)
@@ -308,7 +322,11 @@ def llm_parse_transactions(text: str) -> list[ParsedTransaction]:
         if structured_llm is not None:
             logger.info(
                 "Submitting chunk to structured LLM parser",
-                extra={"chunk_index": index, "chunk_count": len(chunks), "chunk_length": len(chunk)},
+                extra={
+                    "chunk_index": index,
+                    "chunk_count": len(chunks),
+                    "chunk_length": len(chunk),
+                },
             )
             try:
                 payload = structured_llm.invoke(
@@ -328,7 +346,10 @@ def llm_parse_transactions(text: str) -> list[ParsedTransaction]:
                 logger.exception("Structured LLM parsing failed", extra={"chunk_index": index})
 
         if not items:
-            logger.warning("Structured LLM returned no items; falling back to plain prompt", extra={"chunk_index": index})
+            logger.warning(
+                "Structured LLM returned no items; falling back to plain prompt",
+                extra={"chunk_index": index},
+            )
             try:
                 payload = llm.invoke(_build_fallback_messages(chunk))
                 items = _coerce_payload_to_items(payload)
@@ -348,10 +369,14 @@ def llm_parse_transactions(text: str) -> list[ParsedTransaction]:
 def parse_transactions(text: str) -> tuple[list[ParsedTransaction], ParseDiagnostics]:
     lines = _normalize_text(text)
     warnings: list[str] = []
-    logger.info("Starting parse_transactions", extra={"text_length": len(text), "line_count": len(lines)})
+    logger.info(
+        "Starting parse_transactions", extra={"text_length": len(text), "line_count": len(lines)}
+    )
 
     if not lines:
-        warnings.append("No text was extracted from the PDF. This may be a scanned statement that needs OCR.")
+        warnings.append(
+            "No text was extracted from the PDF. This may be a scanned statement that needs OCR."
+        )
         logger.warning("No normalized lines found during transaction parsing")
         diagnostics = ParseDiagnostics(
             text_preview="",
@@ -379,6 +404,10 @@ def parse_transactions(text: str) -> tuple[list[ParsedTransaction], ParseDiagnos
     )
     logger.info(
         "Completed parse_transactions",
-        extra={"transaction_count": len(transactions), "warning_count": len(warnings), "llm_succeeded": llm_succeeded},
+        extra={
+            "transaction_count": len(transactions),
+            "warning_count": len(warnings),
+            "llm_succeeded": llm_succeeded,
+        },
     )
     return transactions, diagnostics

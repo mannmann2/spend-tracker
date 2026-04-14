@@ -8,7 +8,9 @@ def format_currency(value: float) -> str:
 
 
 def render_statement_transactions(statement_transactions, statement_id: int) -> None:
-    transactions = statement_transactions[statement_transactions["statement_id"] == statement_id].copy()
+    transactions = statement_transactions[
+        statement_transactions["statement_id"] == statement_id
+    ].copy()
     if transactions.empty:
         render_empty_state(
             "No transactions stored for this statement",
@@ -59,7 +61,9 @@ def render_statement_library(
             if st.button(
                 label,
                 key=f"select-statement-{row.id}",
-                type="primary" if int(row.id) == st.session_state["selected_statement_id"] else "secondary",
+                type="primary"
+                if int(row.id) == st.session_state["selected_statement_id"]
+                else "secondary",
                 width="stretch",
             ):
                 st.session_state["selected_statement_id"] = int(row.id)
@@ -67,7 +71,9 @@ def render_statement_library(
 
     selected_id = int(st.session_state["selected_statement_id"])
     selected_row = statements[statements["id"] == selected_id].iloc[0]
-    selected_transactions = statement_transactions[statement_transactions["statement_id"] == selected_id]
+    selected_transactions = statement_transactions[
+        statement_transactions["statement_id"] == selected_id
+    ]
 
     with detail_col:
         st.markdown(
@@ -97,12 +103,17 @@ def render_statement_library(
                     ("Transactions", int(selected_row.transaction_count)),
                     ("Debits", format_currency(debit_total)),
                     ("Credits", format_currency(credit_total)),
-                    ("Needs Review", int((selected_transactions["category"] == "Needs Review").sum())),
+                    (
+                        "Needs Review",
+                        int((selected_transactions["category"] == "Needs Review").sum()),
+                    ),
                 ]
             )
 
         action1, action2 = st.columns([1, 1])
-        if action1.button("Delete Selected Statement", key=f"delete-statement-{selected_id}", width="stretch"):
+        if action1.button(
+            "Delete Selected Statement", key=f"delete-statement-{selected_id}", width="stretch"
+        ):
             on_delete_selected(selected_id, selected_row.file_name)
         if action2.button("Delete All Uploaded Statements", type="secondary", width="stretch"):
             on_delete_all()

@@ -8,7 +8,6 @@ from spending_tracker.db import get_mapping, upsert_mapping
 from spending_tracker.llm import build_llm
 from spending_tracker.parser import merchant_key
 
-
 DEFAULT_CATEGORIES = [
     "Groceries",
     "Dining",
@@ -75,8 +74,12 @@ def _parse_category_response(content) -> tuple[str, float]:
     except Exception:
         pass
 
-    category_match = re.search(r'"?category"?\s*[:=]\s*"?(?P<category>[A-Za-z &-]+)"?', normalized, re.IGNORECASE)
-    confidence_match = re.search(r'"?confidence"?\s*[:=]\s*"?(?P<confidence>\d*\.?\d+)"?', normalized, re.IGNORECASE)
+    category_match = re.search(
+        r'"?category"?\s*[:=]\s*"?(?P<category>[A-Za-z &-]+)"?', normalized, re.IGNORECASE
+    )
+    confidence_match = re.search(
+        r'"?confidence"?\s*[:=]\s*"?(?P<confidence>\d*\.?\d+)"?', normalized, re.IGNORECASE
+    )
     if category_match:
         category = category_match.group("category").strip()
         confidence = float(confidence_match.group("confidence")) if confidence_match else 0.5

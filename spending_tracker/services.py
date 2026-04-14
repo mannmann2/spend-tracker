@@ -94,7 +94,9 @@ def ingest_statement(uploaded_file, account_name: str) -> IngestResult:
         )
 
     inserted = save_transactions(rows)
-    message = f"Processed {len(parsed)} candidate transactions using {diagnostics.parser_used} parsing."
+    message = (
+        f"Processed {len(parsed)} candidate transactions using {diagnostics.parser_used} parsing."
+    )
     return IngestResult(
         parsed_count=len(parsed),
         inserted_count=inserted,

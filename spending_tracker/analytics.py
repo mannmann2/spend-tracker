@@ -25,7 +25,9 @@ def filter_transactions(
     if directions:
         filtered = filtered[filtered["direction"].isin(directions)]
     if not include_transfers:
-        filtered = filtered[~filtered["category"].fillna("").str.lower().isin(["transfer", "transfers"])]
+        filtered = filtered[
+            ~filtered["category"].fillna("").str.lower().isin(["transfer", "transfers"])
+        ]
     return filtered
 
 

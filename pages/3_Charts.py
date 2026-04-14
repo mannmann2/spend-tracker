@@ -54,7 +54,9 @@ data = load_transactions()
 filtered = render_filters_sidebar(data)
 
 st.subheader("Visualisations")
-render_section_lead("Charts respond to the sidebar filters, so you can narrow accounts, dates, categories, directions, and transfers before comparing trends.")
+render_section_lead(
+    "Charts respond to the sidebar filters, so you can narrow accounts, dates, categories, directions, and transfers before comparing trends."
+)
 if filtered.empty:
     render_empty_state(
         "No data available for charts",
@@ -103,7 +105,9 @@ else:
             legend_title_text="Category",
         )
 
-        account_mix = expenses.groupby(["account", "category"], dropna=False)["amount"].sum().reset_index()
+        account_mix = (
+            expenses.groupby(["account", "category"], dropna=False)["amount"].sum().reset_index()
+        )
         heatmap = px.density_heatmap(
             account_mix,
             x="account",
@@ -128,7 +132,9 @@ else:
             .reset_index()
             .sort_values(["category", "txn_date"])
         )
-        cumulative_daily["cumulative_spend"] = cumulative_daily.groupby("category")["amount"].cumsum()
+        cumulative_daily["cumulative_spend"] = cumulative_daily.groupby("category")[
+            "amount"
+        ].cumsum()
 
         latest_txn_date = year_expenses["txn_date"].max().normalize()
         date_range = pd.date_range(
@@ -166,12 +172,16 @@ else:
         cumulative_chart.update_traces(line={"width": 3.5})
 
         st.subheader("Trends")
-        render_section_lead("Track cumulative spending over the year and compare how categories stack month by month.")
+        render_section_lead(
+            "Track cumulative spending over the year and compare how categories stack month by month."
+        )
         st.plotly_chart(cumulative_chart, width="stretch")
         st.plotly_chart(trend, width="stretch")
 
         st.subheader("Breakdowns")
-        render_section_lead("Switch period controls to isolate category concentration for a specific month or year.")
+        render_section_lead(
+            "Switch period controls to isolate category concentration for a specific month or year."
+        )
         category_period = st.radio(
             "Category spend period",
             options=["Month", "Year"],
@@ -187,9 +197,7 @@ else:
                 format_func=lambda value: pd.to_datetime(f"{value}-01").strftime("%B %Y"),
             )
             breakdown_source = expenses[expenses["month"] == selected_month].copy()
-            breakdown_title = (
-                f"Category spend breakdown for {pd.to_datetime(f'{selected_month}-01').strftime('%B %Y')}"
-            )
+            breakdown_title = f"Category spend breakdown for {pd.to_datetime(f'{selected_month}-01').strftime('%B %Y')}"
         else:
             available_breakdown_years = sorted(expenses["year"].dropna().unique().tolist())
             selected_breakdown_year = st.selectbox(
@@ -219,5 +227,7 @@ else:
         st.plotly_chart(breakdown, width="stretch")
 
         st.subheader("Mix")
-        render_section_lead("Use the heatmap to spot which accounts dominate each spending category.")
+        render_section_lead(
+            "Use the heatmap to spot which accounts dominate each spending category."
+        )
         st.plotly_chart(heatmap, width="stretch")

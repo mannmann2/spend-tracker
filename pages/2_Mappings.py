@@ -1,7 +1,13 @@
 import streamlit as st
 
 from spending_tracker.categorizer import DEFAULT_CATEGORIES
-from spending_tracker.db import get_categories, get_uncategorized, init_db, list_merchants, upsert_mapping
+from spending_tracker.db import (
+    get_categories,
+    get_uncategorized,
+    init_db,
+    list_merchants,
+    upsert_mapping,
+)
 from spending_tracker.services import recategorize_uncategorized_transactions
 from ui.common import (
     render_badges,
@@ -11,7 +17,6 @@ from ui.common import (
     render_section_lead,
     render_shell,
 )
-
 
 init_db()
 render_shell(
@@ -57,7 +62,9 @@ if "mapping_message" in st.session_state:
     st.toast(st.session_state.pop("mapping_message"), icon=":material/check_circle:")
 
 st.subheader("Automation")
-render_section_lead("Run the categorisation pass for uncategorised rows, then refine reusable merchant mappings below.")
+render_section_lead(
+    "Run the categorisation pass for uncategorised rows, then refine reusable merchant mappings below."
+)
 
 if st.button("Run LLM Categorisation For Uncategorised Transactions"):
     result = recategorize_uncategorized_transactions()
@@ -86,7 +93,9 @@ with tab_mapped:
     else:
         for start in range(0, len(mapped_merchants), 3):
             grid = st.columns(3)
-            for offset, row in enumerate(mapped_merchants.iloc[start : start + 3].itertuples(index=False)):
+            for offset, row in enumerate(
+                mapped_merchants.iloc[start : start + 3].itertuples(index=False)
+            ):
                 with grid[offset]:
                     card_variant = (start + offset) % 3 + 1
                     st.markdown(
@@ -119,7 +128,9 @@ with tab_mapped:
                     )
 
 with tab_unmapped:
-    st.write("Create mappings for merchants that still fall back to review or non-mapped categorisation.")
+    st.write(
+        "Create mappings for merchants that still fall back to review or non-mapped categorisation."
+    )
     if unmapped_merchants.empty:
         render_empty_state(
             "No merchants need mapping",
@@ -153,7 +164,9 @@ with tab_unmapped:
                         st.selectbox(
                             "Category",
                             options=category_options,
-                            index=category_options.index(row.category) if row.category in category_options else 0,
+                            index=category_options.index(row.category)
+                            if row.category in category_options
+                            else 0,
                             key=widget_key,
                             on_change=_save_mapping_from_state,
                             args=(row.merchant_key, widget_key),
@@ -164,17 +177,26 @@ with tab_unmapped:
                             key=f"new-category-{row.merchant_key}",
                             placeholder="Enter a category name",
                         )
-                        if st.button("Save new category", key=f"save-mapping-{row.merchant_key}", width="stretch"):
+                        if st.button(
+                            "Save new category",
+                            key=f"save-mapping-{row.merchant_key}",
+                            width="stretch",
+                        ):
                             category = selected.strip()
                             if not category:
                                 st.error("Choose or enter a category before saving.")
                             else:
                                 upsert_mapping(row.merchant_key, category)
-                                st.session_state["mapping_message"] = f"Saved mapping for {row.merchant_key} -> {category}"
+                                st.session_state["mapping_message"] = (
+                                    f"Saved mapping for {row.merchant_key} -> {category}"
+                                )
                                 st.rerun()
 
                 with input2:
-                    st.metric("Needs Review Rows", int((uncategorized["merchant_key"] == row.merchant_key).sum()))
+                    st.metric(
+                        "Needs Review Rows",
+                        int((uncategorized["merchant_key"] == row.merchant_key).sum()),
+                    )
 
 st.subheader("Needs Review Transactions")
 if uncategorized.empty:
@@ -183,7 +205,11 @@ if uncategorized.empty:
         "Everything currently has a category, so there is nothing left in the review queue.",
     )
 else:
-    render_section_lead("These transactions still need attention. Creating a merchant mapping above will update matching rows.")
-    preview = uncategorized[["txn_date", "description", "merchant_key", "amount", "direction", "category"]].copy()
+    render_section_lead(
+        "These transactions still need attention. Creating a merchant mapping above will update matching rows."
+    )
+    preview = uncategorized[
+        ["txn_date", "description", "merchant_key", "amount", "direction", "category"]
+    ].copy()
     preview["txn_date"] = preview["txn_date"].dt.strftime("%Y-%m-%d")
     st.dataframe(preview, width="stretch", hide_index=True)

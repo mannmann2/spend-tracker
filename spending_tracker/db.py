@@ -6,7 +6,6 @@ import pandas as pd
 
 from spending_tracker.config import get_settings
 
-
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS accounts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -243,7 +242,9 @@ def save_transactions(rows: list[dict]) -> int:
     return inserted
 
 
-def upsert_mapping(merchant_key: str, category: str, transaction_source: str = "user_mapping") -> None:
+def upsert_mapping(
+    merchant_key: str, category: str, transaction_source: str = "user_mapping"
+) -> None:
     with get_connection() as conn:
         conn.execute(
             """
